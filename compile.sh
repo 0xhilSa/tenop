@@ -14,6 +14,8 @@ CUDA_PATH=/usr/local/cuda
 
 HOST_SRC="./rush/engine/cpu_core.c"
 HOST_OUT="./rush/engine/cpu_core.so"
+CUDA_SRC="./rush/engine/cuda_core.cu"
+CUDA_OUT="./rush/engine/cuda_core.so"
 
 spinner(){
   local pid=$1
@@ -33,11 +35,11 @@ compile_pid=$!
 spinner $compile_pid
 wait $compile_pid
 
-#$NVCC -shared -Xcompiler -fPIC -I$CUDA_PATH/include $PYTHON_INCLUDE \
-#    -o $CUDA_OUT -L$CUDA_PATH/lib64 -lcudart $CUDA_SRC &
-#
-#compile_pid=$!
-#spinner $compile_pid
-#wait $compile_pid
+$NVCC -shared -Xcompiler -fPIC -I$CUDA_PATH/include $PYTHON_INCLUDE \
+    -o $CUDA_OUT -L$CUDA_PATH/lib64 -lcudart $CUDA_SRC &
+
+compile_pid=$!
+spinner $compile_pid
+wait $compile_pid
 
 echo -ne "\r\033[KCompiled Successfully!\n"
