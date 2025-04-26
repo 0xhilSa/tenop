@@ -232,25 +232,25 @@ static PyObject* v_fromcpu(PyObject* slef, PyObject* args){
       case 'd': item = PyFloat_FromDouble(((double*)ptr)[i]); break;
       case 'g': item = PyFloat_FromDouble(((long double*)ptr)[i]); break;
       case 'F': {
-                  float _Complex val = ((float _Complex*)ptr)[i];
-                  item = PyComplex_FromDoubles(crealf(val), cimagf(val));
-                  break;
-                }
+        float _Complex val = ((float _Complex*)ptr)[i];
+        item = PyComplex_FromDoubles(crealf(val), cimagf(val));
+        break;
+      }
       case 'D': {
-                  double _Complex val = ((double _Complex*)ptr)[i];
-                  item = PyComplex_FromDoubles(crealf(val), cimagf(val));
-                  break;
-                }
+        double _Complex val = ((double _Complex*)ptr)[i];
+        item = PyComplex_FromDoubles(crealf(val), cimagf(val));
+        break;
+      }
       case 'G': {
-                  long double _Complex val = ((long double _Complex*)ptr)[i];
-                  item = PyComplex_FromDoubles(crealf(val), cimagf(val));
-                  break;
-                }
+        long double _Complex val = ((long double _Complex*)ptr)[i];
+        item = PyComplex_FromDoubles(crealf(val), cimagf(val));
+        break;
+      }
       default:  {
-                  Py_DECREF(pylist);
-                  PyErr_Format(PyExc_ValueError, "Unsupported format character: %c", *fmt);
-                  return NULL;
-                }
+        Py_DECREF(pylist);
+        PyErr_Format(PyExc_ValueError, "Unsupported format character: %c", *fmt);
+        return NULL;
+      }
     }
     if(PyErr_Occurred()){
       free(ptr);
