@@ -17,3 +17,8 @@ print(cuda_core.v_fromCUDA(dptr, len(x), dtypes.uint8.fmt))
 hptr = cuda_core.v_toHost(dptr, len(x), dtypes.uint8.fmt)
 print(hptr)
 print(cpu_core.v_fromCPU(hptr, len(x), dtypes.uint8.fmt))
+
+y = 12
+hhptr = cpu_core.s_toCPU(y, dtypes.longdoublecomplex.fmt)
+print(hhptr)
+print(cpu_core.s_fromCPU(hhptr, dtypes.longdoublecomplex.fmt))
