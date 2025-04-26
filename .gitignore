@@ -1,2 +1,3 @@
 __pycache__/
 rush/csrc/*.so
+rush/engine/*.so
