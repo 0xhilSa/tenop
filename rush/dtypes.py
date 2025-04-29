@@ -38,3 +38,10 @@ longdouble = float128 = DType.new("long double", True, "g", 16)
 floatcomplex = complex64 = DType.new("float _Complex", True, "F", 8)
 doublecomplex = complex128 = DType.new("double _Complex", True, "D", 16)
 longdoublecomplex = complex256 = DType.new("long double _Complex", True, "G", 32)
+
+
+INTS = [int8, int16, int32, int64, char, byte, short, int_, long, longlong]
+UINTS = [uint8, uint16, uint32, uint64, ubyte, ushort, uint, ulong, ulonglong]
+FP = [float32, float64, float128, float_, double, longdouble]
+CMPX = [complex64, complex128, complex256, floatcomplex, doublecomplex, longdoublecomplex]
+BOOL = [boolean, bool_]

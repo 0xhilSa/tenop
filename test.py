@@ -1,24 +1,21 @@
-from rush.engine import cpu_core, cuda_core
 from rush import dtypes
+from rush.buffers import Buffer
 
 
-x = 23
-dptr = cuda_core.s_toCUDA(x, dtypes.uint8.fmt)
-print(dptr)
-print(cuda_core.s_fromCUDA(dptr, dtypes.uint8.fmt))
-hptr = cuda_core.s_toHost(dptr, dtypes.uint8.fmt)
-print(hptr)
-print(cpu_core.s_fromCPU(hptr, dtypes.uint8.fmt))
+buff1 = Buffer([1,2,3,4,5], device="cpu", dtype=dtypes.complex128)
+buff2 = Buffer([1,2,3,4,5], device="cuda", dtype=dtypes.complex128)
+print(buff1)
+print(buff1.pointer)
+print(buff1.length)
+print(buff1.dtype)
+print(buff1.device)
+print(buff1.backend)
 
-x = [1,2,3,4,5,6,7]
-dptr = cuda_core.v_toCUDA(x, dtypes.uint8.fmt)
-print(dptr)
-print(cuda_core.v_fromCUDA(dptr, len(x), dtypes.uint8.fmt))
-hptr = cuda_core.v_toHost(dptr, len(x), dtypes.uint8.fmt)
-print(hptr)
-print(cpu_core.v_fromCPU(hptr, len(x), dtypes.uint8.fmt))
+print(buff2)
+print(buff2.pointer)
+print(buff2.length)
+print(buff2.dtype)
+print(buff2.device)
+print(buff2.backend)
 
-y = 12
-hhptr = cpu_core.s_toCPU(y, dtypes.longdoublecomplex.fmt)
-print(hhptr)
-print(cpu_core.s_fromCPU(hhptr, dtypes.longdoublecomplex.fmt))
+
