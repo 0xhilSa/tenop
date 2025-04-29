@@ -1,9 +1,16 @@
 from rush import dtypes
 from rush.buffers import Buffer
-
+from rush.vm import VirtualMemory
+vm = VirtualMemory()
 
 buff1 = Buffer([1,2,3,4,5], device="cpu", dtype=dtypes.complex128)
 buff2 = Buffer([1,2,3,4,5], device="cuda", dtype=dtypes.complex128)
+
+vm.register("a", buff1)
+vm.register("b", buff2)
+
+print("======================================")
+
 print(buff1)
 print(buff1.pointer)
 print(buff1.length)
