@@ -19,7 +19,7 @@ class Buffer:
   ):
     self.__pointer, self.__length = self._check_input(obj, dtype, device)
     self.__dtype = dtype
-    self.__nbytes = self.__length * self.__dtype
+    self.__nbytes = self.__length * self.__dtype.size
     self.__nbits = self.__dtype.size * 8
     self.__device = device
     self.__const = const
