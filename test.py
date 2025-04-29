@@ -8,6 +8,7 @@ buff2 = Buffer([1,2,3,4,5], device="cuda", dtype=dtypes.complex128)
 
 vm.register("a", buff1)
 vm.register("b", buff2)
+vm.register("c", buff2)
 
 print("======================================")
 
