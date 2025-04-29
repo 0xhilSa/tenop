@@ -5,4 +5,4 @@
 - [ ] basic vector/scalar ops like `__setitem__`, `__getitem__`, `append`, `insert`, and `remove` on backend yet to be impl
 - [ ] arithmetic and logical ops yet to be impl
 - [ ] visualization using graph yet to be impl
-- [ ] `Vector` and `Scalar` class yet to be impl to saparate scalar and vector ops on Buffers and LazyBuffer
+- [ ] `Vector` and `Scalar` class yet to be impl to saparate scalar and vector ops on `Buffer` and `LazyBuffer`
