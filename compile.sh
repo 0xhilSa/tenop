@@ -7,11 +7,6 @@ PYTHON_INCLUDE=$(python${PYTHON_VERSION}-config --includes)
 PYTHON_LIBS=$(python${PYTHON_VERSION}-config --ldflags | sed 's@/usr/lib[^ ]*libdl.a@@g')
 CUDA_PATH=/usr/local/cuda
 
-#HOST_SRC="./rush/csrc/cpu_core.c"
-#CUDA_SRC="./rush/csrc/cuda_core.cu"
-#HOST_OUT="./rush/csrc/cpu_core.so"
-#CUDA_OUT="./rush/csrc/cuda_core.so"
-
 HOST_SRC="./rush/engine/cpu_core.c"
 HOST_OUT="./rush/engine/cpu_core.so"
 CUDA_SRC="./rush/engine/cuda_core.cu"
