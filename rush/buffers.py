@@ -17,7 +17,7 @@ class Buffer:
     device: Devices = "cpu",
     const: bool = False
   ):
-    self.__pointer, self.__length = self._check_input(obj, dtype, device)
+    self.__pointer, self.__length, self.__kind = self._check_input(obj, dtype, device)
     self.__dtype = dtype
     self.__nbytes = self.__length * self.__dtype.size
     self.__nbits = self.__dtype.size * 8
@@ -69,6 +69,7 @@ class Buffer:
         "cpu": lambda: cpu_core.v_toCPU(obj, dtype.fmt),
         "cuda": lambda: cuda_core.v_toCUDA(obj, dtype.fmt)
       }
+      kind = "v"
     elif isinstance(obj, (int, float, complex, bool)):
       py_type = Buffer._from_custom2builtin(dtype) if not isinstance(dtype, type) else dtype
       obj = py_type(obj)
@@ -78,7 +79,35 @@ class Buffer:
         "cpu": lambda: cpu_core.s_toCPU(obj, dtype.fmt),
         "cuda": lambda: cuda_core.s_toCUDA(obj, dtype.fmt)
       }
+      kind = "s"
     else: raise TypeError(f"Unsupported object type: {type(obj).__name__}")
     if device not in dispatch: raise ValueError(f"Unsupported device: '{device}'")
     pointer = dispatch[device]()
-    return pointer, length
+    return pointer, length, kind
+
+  def __getitem__(self, index:Union[int, slice]): raise NotImplementedError
+  def __setitem__(self, index, value:Union[int, slice]): raise NotImplementedError
+
+  def cuda(self):
+    if self.__device == "cpu":
+      if self.__kind == "s":
+        scalar = cpu_core.s_fromCPU(self.__pointer, self.__dtype.fmt)
+        return Buffer(scalar, dtype=self.__dtype, device="cuda")
+      elif self.__kind == "v":
+        vector = cpu_core.v_fromCPU(self.__pointer, self.__length, self.__dtype.fmt)
+        return Buffer(vector, dtype=self.__dtype, device="cuda")
+    return self
+  def cpu(self):
+    if self.__device == "cpu":
+      if self.__kind == "s":
+        scalar = cuda_core.s_fromCUDA(self.__pointer, self.__dtype.fmt)
+        return Buffer(scalar, dtype=self.__dtype, device="cpu")
+      elif self.__kind == "v":
+        vector = cuda_core.v_fromCUDA(self.__pointer, self.__length, self.__dtype.fmt)
+        return Buffer(vector, dtype=self.__dtype, device="cpu")
+    return self
+  def isvector(self): return self.__kind == "v"
+  def isscalar(self): return self.__kind == "s"
+
+  def append(self): raise NotImplementedError
+  def remove(self): raise NotImplementedError
