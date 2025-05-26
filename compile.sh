@@ -7,10 +7,10 @@ PYTHON_INCLUDE=$(python${PYTHON_VERSION}-config --includes)
 PYTHON_LIBS=$(python${PYTHON_VERSION}-config --ldflags | sed 's@/usr/lib[^ ]*libdl.a@@g')
 CUDA_PATH=/usr/local/cuda
 
-HOST_SRC="./rush/engine/cpu_core.c"
-HOST_OUT="./rush/engine/cpu_core.so"
-CUDA_SRC="./rush/engine/cuda_core.cu"
-CUDA_OUT="./rush/engine/cuda_core.so"
+HOST_SRC="./cuten/engine/cpu.c"
+HOST_OUT="./cuten/engine/cpu.so"
+CUDA_SRC="./cuten/engine/cuda.cu"
+CUDA_OUT="./cuten/engine/cuda.so"
 
 spinner(){
   local pid=$1
