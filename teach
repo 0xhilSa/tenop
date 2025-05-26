@@ -1,6 +1,0 @@
-what we need to return the pylist from pycapsule
-
-- pycapsule (obv)
-- shape (to extract length)
-- fmt string
-
