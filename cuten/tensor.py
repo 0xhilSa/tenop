@@ -1,3 +1,4 @@
+from __future__ import annotations
 from types import NoneType
 from typing import Type, Union, Sequence
 from .buffers import Buffer, LazyBuffer
