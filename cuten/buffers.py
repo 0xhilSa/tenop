@@ -6,10 +6,10 @@ from .device import Device
 from .helpers import TensorType, flatten, has_uniform_shape, infer_shape, reshape
 from .dtypes import *
 from .shape import Shape
-from .engine import cpu
+from .engine import cpu, cuda
 
 
-class BaseBuffer:
+class _BaseBuffer:
   def __init__(self, buffer:TensorType, dtype:Union[DType,Type,NoneType]=None, device:str="cpu:0", requires_grad:bool=False, const:bool=False):
     if not has_uniform_shape(buffer): raise ValueError("Buffer must have uniform shape")
     self.__shape = Shape(infer_shape(buffer))
@@ -34,7 +34,7 @@ class BaseBuffer:
     elif dtype in [int, float, complex, bool]: self.__dtype = maps[dtype]
     else: raise ValueError(f"Invalid DType: expected from int, float, complex, or bool")
     if self.__device.type_ == "cpu": self.__pointer = cpu.tohost(__flatten, self.__dtype.fmt)
-    else: raise NotImplementedError
+    elif self.__device.type_ == "cuda": self.__pointer = cuda.tocuda(__flatten, self.__device.index, self.__shape.numel(), self.__dtype.fmt)
   @property
   def shape(self): return self.__shape
   @property
@@ -55,10 +55,18 @@ class BaseBuffer:
     return length * self.__dtype.nbyte
   def numpy(self):
     if self.__device.type_ == "cpu": return np.array(reshape(cpu.data(self.ptr, self.shape.totuple(), self.dtype.fmt), self.__shape.totuple()))
-    elif self.__device.type_ == "cuda": raise NotImplementedError
+    elif self.__device.type_ == "cuda":
+      tocpu = cuda.tocpu(self.ptr, self.shape.numel(), self.dtype.fmt)
+      return np.array(reshape(cpu.data(tocpu, self.shape.totuple(), self.dtype.fmt), self.__shape.totuple()))
+  def numel(self): return self.__shape.numel()
 
-class Buffer(BaseBuffer):
+class Buffer(_BaseBuffer):
   def __repr__(self): return f"<Buffer(shape={self.shape.totuple()}, dtype='{self.dtype.ctype}', device='{self.device.type_}:{self.device.index}', requires_grad={self.requires_grad()}, const={self.is_const()})>"
 
-class LazyBuffer(BaseBuffer):
+class LazyBuffer(_BaseBuffer):
   def __repr__(self): return f"<LazyBuffer(shape={self.shape.totuple()}, dtype='{self.dtype.ctype}', device='{self.device.type_}:{self.device.index}', requires_grad={self.requires_grad()}, const={self.is_const()})>"
+
+__all__ = [
+  "Buffer",
+  "LazyBuffer"
+]

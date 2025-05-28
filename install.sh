@@ -38,3 +38,28 @@ spinner $compile_pid
 wait $compile_pid
 
 echo -ne "\r\033[KCompiled Successfully!\n"
+
+AUTO_YES=false
+
+if python3 -c "import cuten" 2>/dev/null; then
+  if [ "$AUTO_YES" = true ]; then
+    echo "Reinstalling cuten ..."
+    pip uninstall -y cuten
+  else
+    read -p "cuten is already installed. Do you want to reinstall it? (y/N)" choice
+    case "$choice" in
+      y|Y)
+        echo "Reinstalling cuten ..."
+        pip uninstall -y cuten
+        ;;
+      *)
+        echo "Aborting installation"
+        exit 1
+        ;;
+    esac
+  fi
+fi
+
+python3 -m build
+cd dist/ && pip install *.whl && cd ..
+rm -rf dist/ build/ cuten.egg-info/

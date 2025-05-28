@@ -1,4 +1,4 @@
-from cuten.engine import cuda
+from .engine import cuda
 
 DEVICES = ["cpu", "cuda"]
 
