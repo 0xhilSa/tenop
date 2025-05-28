@@ -1,3 +1,3 @@
 cuTen
 
-work in progress
+Lightweight tensor computation library with CUDA backend
