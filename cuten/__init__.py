@@ -43,6 +43,8 @@ def tensor(array:TensorType, dtype:Union[DType,Type,None]=None, device:str="cpu:
   return Tensor(array, dtype=dtype, device=device, requires_grad=requires_grad, const=const, lazy=lazy)
 
 __all__ = [
+  "Scalar",
+  "TensorType",
   "Tensor",
   "Shape",
   "tensor",
