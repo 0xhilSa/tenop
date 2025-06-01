@@ -1,16 +1,16 @@
 from __future__ import annotations
 from types import NoneType
-from typing import Union, Type
+from typing import Union, Type, Tuple
 import numpy as np
 from .device import Device
-from .helpers import TensorType, flatten, has_uniform_shape, infer_shape, reshape
+from .helpers import Scalar, TensorType, flatten, has_uniform_shape, infer_shape, reshape
 from .dtypes import *
 from .shape import Shape
 from .engine import cpu, cuda
 
 
 class _BaseBuffer:
-  def __init__(self, buffer:TensorType, dtype:Union[DType,Type,NoneType]=None, device:str="cpu:0", requires_grad:bool=False, const:bool=False):
+  def __init__(self, buffer:Union[Scalar, TensorType], dtype:Union[DType,Type,NoneType]=None, device:str="cpu:0", requires_grad:bool=False, const:bool=False):
     if not has_uniform_shape(buffer): raise ValueError("Buffer must have uniform shape")
     self.__shape = Shape(infer_shape(buffer))
     self.__ndim = len(self.__shape)
@@ -47,26 +47,29 @@ class _BaseBuffer:
   def ptr(self): return self.__pointer
   @property
   def stride(self): return self.__stride
+  @property
   def requires_grad(self): return self.__requires_grad
+  @property
   def is_const(self): return self.__const
   def sizeof(self):
     length = 1
     for x in self.__shape.tolist(): length *= x
     return length * self.__dtype.nbyte
   def numpy(self):
-    if self.__device.type_ == "cpu": return np.array(reshape(cpu.data(self.ptr, self.shape.totuple(), self.dtype.fmt), self.__shape.totuple()))
-    elif self.__device.type_ == "cuda":
+    if self.device.type_ == "cpu": return np.array(reshape(cpu.data(self.ptr, self.shape.totuple(), self.dtype.fmt), self.__shape.totuple()))
+    elif self.device.type_ == "cuda":
       tocpu = cuda.tocpu(self.ptr, self.shape.numel(), self.dtype.fmt)
       return np.array(reshape(cpu.data(tocpu, self.shape.totuple(), self.dtype.fmt), self.__shape.totuple()))
   def numel(self): return self.__shape.numel()
+  def astype(self, dtype:Union[DType,Type]):
+    if self.__device.type_ == "cpu": return reshape(cpu.data(self.ptr, self.shape.totuple(), self.dtype.fmt), self.shape.totuple())
+    elif self.__device.type_ == "cuda": return reshape(cpu.data(cuda.tocpu(self.ptr, self.numel(), self.dtype.fmt), self.shape.totuple(), self.dtype.fmt), self.shape.totuple())
+    else: raise ValueError(f"Invalid Dtype: {dtype}")
 
 class Buffer(_BaseBuffer):
-  def __repr__(self): return f"<Buffer(shape={self.shape.totuple()}, dtype='{self.dtype.ctype}', device='{self.device.type_}:{self.device.index}', requires_grad={self.requires_grad()}, const={self.is_const()})>"
+  def __repr__(self): return f"<Buffer(shape={self.shape.totuple()}, dtype='{self.dtype.ctype}', device='{self.device.type_}:{self.device.index}', requires_grad={self.requires_grad}, const={self.is_const})>"
 
 class LazyBuffer(_BaseBuffer):
-  def __repr__(self): return f"<LazyBuffer(shape={self.shape.totuple()}, dtype='{self.dtype.ctype}', device='{self.device.type_}:{self.device.index}', requires_grad={self.requires_grad()}, const={self.is_const()})>"
+  def __repr__(self): return f"<LazyBuffer(shape={self.shape.totuple()}, dtype='{self.dtype.ctype}', device='{self.device.type_}:{self.device.index}', requires_grad={self.requires_grad}, const={self.is_const})>"
 
-__all__ = [
-  "Buffer",
-  "LazyBuffer"
-]
+__all__ = ["Buffer", "LazyBuffer"]

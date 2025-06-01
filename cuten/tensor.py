@@ -1,15 +1,17 @@
 from __future__ import annotations
-from types import NoneType
-from typing import Type, Union, Sequence
+from typing import Type, Union, Sequence, Tuple
 from .buffers import Buffer, LazyBuffer
-from .dtypes import DType
+from .dtypes import *
+from .helpers import reshape
+from .shape import Shape
 
 Scalar = Union[int, float, complex, bool, DType]
 TensorType = Union[Scalar, Sequence["TensorType"]]
 
 class Tensor:
-  def __init__(self, tensor:TensorType, dtype:Union[Type,DType,NoneType]=None, device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
-    if lazy: self.__buffer = LazyBuffer(tensor, dtype, device, requires_grad, const)
+  def __init__(self, tensor:Union[Scalar, TensorType], dtype:Union[Type,DType,None]=None, device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
+    self.__lazy = lazy
+    if self.__lazy: self.__buffer = LazyBuffer(tensor, dtype, device, requires_grad, const)
     else: self.__buffer = Buffer(tensor, dtype, device, requires_grad, const)
   def __repr__(self): return f"<Tensor({self.__buffer})>"
   @property
@@ -20,12 +22,30 @@ class Tensor:
   def ndim(self): return self.__buffer.ndim
   @property
   def strides(self): return self.__buffer.stride
-  def requires_grad(self): return self.__buffer.requires_grad()
-  def is_const(self): return self.__buffer.is_const()
+  def requires_grad(self): return self.__buffer.requires_grad
+  def is_const(self): return self.__buffer.is_const
   def numel(self): return self.__buffer.numel()
   def shape(self, dim:Union[int,None]=None):
     if dim is None: return self.__buffer.shape
     if not 0 <= dim < len(self.__buffer.shape): raise IndentationError("Index out of range")
     return self.__buffer.shape[dim]
+  def pointer(self): return self.__buffer.ptr
   def sizeof(self): return self.__buffer.sizeof()
   def numpy(self): return self.__buffer.numpy()
+  def astype(self, dtype:Union[DType, Type]):
+    return Tensor(self.__buffer.astype(dtype), dtype=dtype, device=f"{self.device.type_}:{self.device.index}", requires_grad=self.__buffer.requires_grad, const=self.__buffer.is_const, lazy=self.__lazy)
+  @staticmethod
+  def ones(shape:Union[Shape,Tuple], device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
+    if not isinstance(shape, Shape): shape = Shape(shape)
+    length = shape.numel()
+    return Tensor(reshape([1] * length, shape.totuple()), device=device, requires_grad=requires_grad, const=const, lazy=lazy)
+  @staticmethod
+  def zeros(shape:Union[Shape,Tuple], device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
+    if not isinstance(shape, Shape): shape = Shape(shape)
+    length = shape.numel()
+    return Tensor(reshape([0] * length, shape.totuple()), device=device, requires_grad=requires_grad, const=const, lazy=lazy)
+  @staticmethod
+  def fill(value:Scalar, shape:Union[Shape,Tuple], device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
+    if not isinstance(shape, Shape): shape = Shape(shape)
+    length = shape.numel()
+    return Tensor(reshape([value] * length, shape.totuple()), device=device, requires_grad=requires_grad, const=const, lazy=lazy)

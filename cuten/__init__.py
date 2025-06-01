@@ -1,5 +1,6 @@
 from typing import Union, Sequence, Type
 from .tensor import Tensor
+from .shape import Shape
 from .dtypes import (
   DType,
   boolean,
@@ -43,6 +44,7 @@ def tensor(array:TensorType, dtype:Union[DType,Type,None]=None, device:str="cpu:
 
 __all__ = [
   "Tensor",
+  "Shape",
   "tensor",
   "boolean",
   "bool_",
