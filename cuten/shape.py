@@ -5,7 +5,7 @@ class Shape:
   def __init__(self, shape:Tuple[int, ...]) -> None:
     if not all(isinstance(x,int) for x in shape): raise TypeError("Dimension must be an integer")
     self.__shape = list(shape)
-  def __repr__(self) -> str: return f"Shape({list(self.__shape)})"
+  def __repr__(self) -> str: return f"Shape({self.__shape})"
   def __len__(self) -> int: return len(self.__shape)
   def tolist(self) -> list: return self.__shape
   def totuple(self) -> tuple: return tuple(self.__shape)
