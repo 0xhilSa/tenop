@@ -1,6 +1,6 @@
 from __future__ import annotations
 from types import NoneType
-from typing import Union, Type, Tuple
+from typing import Union, Type
 import numpy as np
 from .device import Device
 from .helpers import Scalar, TensorType, flatten, has_uniform_shape, infer_shape, reshape
@@ -61,10 +61,9 @@ class _BaseBuffer:
       tocpu = cuda.tocpu(self.ptr, self.shape.numel(), self.dtype.fmt)
       return np.array(reshape(cpu.data(tocpu, self.shape.totuple(), self.dtype.fmt), self.__shape.totuple()))
   def numel(self): return self.__shape.numel()
-  def astype(self, dtype:Union[DType,Type]):
+  def data(self):
     if self.__device.type_ == "cpu": return reshape(cpu.data(self.ptr, self.shape.totuple(), self.dtype.fmt), self.shape.totuple())
-    elif self.__device.type_ == "cuda": return reshape(cpu.data(cuda.tocpu(self.ptr, self.numel(), self.dtype.fmt), self.shape.totuple(), self.dtype.fmt), self.shape.totuple())
-    else: raise ValueError(f"Invalid Dtype: {dtype}")
+    return reshape(cpu.data(cuda.tocpu(self.ptr, self.numel(), self.dtype.fmt), self.shape.totuple(), self.dtype.fmt), self.shape.totuple())
 
 class Buffer(_BaseBuffer):
   def __repr__(self): return f"<Buffer(shape={self.shape.totuple()}, dtype='{self.dtype.ctype}', device='{self.device.type_}:{self.device.index}', requires_grad={self.requires_grad}, const={self.is_const})>"

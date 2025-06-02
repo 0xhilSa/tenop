@@ -22,7 +22,9 @@ class Tensor:
   def ndim(self): return self.__buffer.ndim
   @property
   def strides(self): return self.__buffer.stride
+  @property
   def requires_grad(self): return self.__buffer.requires_grad
+  @property
   def is_const(self): return self.__buffer.is_const
   def numel(self): return self.__buffer.numel()
   def shape(self, dim:Union[int,None]=None):
@@ -33,7 +35,8 @@ class Tensor:
   def sizeof(self): return self.__buffer.sizeof()
   def numpy(self): return self.__buffer.numpy()
   def astype(self, dtype:Union[DType, Type]):
-    return Tensor(self.__buffer.astype(dtype), dtype=dtype, device=f"{self.device.type_}:{self.device.index}", requires_grad=self.__buffer.requires_grad, const=self.__buffer.is_const, lazy=self.__lazy)
+    return Tensor(self.__buffer.data(), dtype=dtype, device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.is_const, lazy=self.__lazy)
+  def clone(self): return Tensor(self.__buffer.data(), dtype=self.dtype, device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.is_const, lazy=self.__lazy)
   @staticmethod
   def ones(shape:Union[Shape,Tuple], device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
     if not isinstance(shape, Shape): shape = Shape(shape)
