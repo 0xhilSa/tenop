@@ -128,6 +128,17 @@ print(cufill.numel())
 print(cufill.numpy())
 print(cufill.pointer())
 
+print("----------Clone-----------")
+clone = a.clone()
+print(clone)
+print(clone.sizeof())
+print(clone.shape())
+print(clone.device)
+print(clone.numel())
+print(clone.numpy())
+print(clone.pointer())
+
+
 end = timeit.default_timer()
 
 print("----------Time-----------")
