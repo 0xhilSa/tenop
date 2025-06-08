@@ -1,4 +1,5 @@
 from cuten import tensor, Tensor
+from cuten.engine import cuda
 import cuten
 import timeit
 
@@ -138,8 +139,23 @@ print(clone.numel())
 print(clone.numpy())
 print(clone.pointer())
 
+print("----------Tensor:make-lazy----------")
+o = Tensor([1,False,3.90,1+2j], device="cuda:0")
+print(o)
+print(o.lazy())
+print(o.lazy())
+
+print("----------Tensor:make-eager----------")
+p = Tensor(2, device="cuda:0").lazy()
+print(p)
+print(p.eager())
 
 end = timeit.default_timer()
 
 print("----------Time-----------")
 print(end - start)
+
+print("----------CUDA:func-----------")
+print(cuda.get_device_name(0))
+print(cuda.current_device())
+print(cuda.get_arch_list())
