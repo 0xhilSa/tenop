@@ -1,9 +1,15 @@
+#include <cuda_device_runtime_api.h>
+#include <cuda_runtime_api.h>
+#include <driver_types.h>
 #include <python3.10/Python.h>
 #include <cuda_runtime.h>
 #include <cuComplex.h>
 #include <python3.10/floatobject.h>
+#include <python3.10/listobject.h>
 #include <python3.10/methodobject.h>
 #include <python3.10/modsupport.h>
+#include <python3.10/object.h>
+#include <python3.10/pyerrors.h>
 
 
 #define CUDA_ERROR(call)                                        \
@@ -406,11 +412,47 @@ static PyObject *tocpu(PyObject *self, PyObject *args){
   return PyCapsule_New(host_buffer, "CPU", cpu_free);
 }
 
+static PyObject *device_name(PyObject *self, PyObject *args){
+  int device_id;
+  if(!PyArg_ParseTuple(args, "i", &device_id)) return NULL;
+  cudaDeviceProp prop;
+  CUDA_ERROR(cudaGetDeviceProperties(&prop, device_id));
+  return Py_BuildValue("s", prop.name);
+}
+
+static PyObject *current_device(PyObject* self, PyObject *args){
+  int device_id;
+  CUDA_ERROR(cudaGetDevice(&device_id));
+  return Py_BuildValue("i", device_id);
+}
+
+static PyObject *get_arch_list(PyObject *self, PyObject *args){
+  int device_count;
+  CUDA_ERROR(cudaGetDeviceCount(&device_count));
+  PyObject *list = PyList_New(0);
+  for(int i = 0; i < device_count; ++i){
+    cudaDeviceProp prop;
+    cudaError_t err = cudaGetDeviceProperties(&prop, i);
+    if(err != cudaSuccess){
+      PyErr_Format(PyExc_RuntimeError, "cudaGetDeviceProperties failed for device %d: %s", i, cudaGetErrorString(err));
+      Py_DECREF(list);
+      return NULL;
+    }
+    PyObject *arch_tuple = Py_BuildValue("(ii)", prop.major, prop.minor);
+    PyList_Append(list, arch_tuple);
+    Py_DECREF(arch_tuple);
+  }
+  return list;
+}
+
 static PyMethodDef CudaMethods[] = {
   {"count", count, METH_NOARGS, "Returns number of CUDA devices"},
   {"get_prop", get_cuda_device_prop, METH_VARARGS, "get CUDA properties"},
   {"tocuda", tocuda, METH_VARARGS, "to CUDA device"},
   {"tocpu", tocpu, METH_VARARGS, "to CPU"},
+  {"get_device_name", device_name, METH_VARARGS, "get CUDA device name"},
+  {"current_device", current_device, METH_NOARGS, "get current CUDA device"},
+  {"get_arch_list", get_arch_list, METH_NOARGS, "get arch lists"},
   {nullptr, nullptr, 0, nullptr}
 };
 
