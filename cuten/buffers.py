@@ -1,6 +1,6 @@
 from __future__ import annotations
 from types import NoneType
-from typing import Union, Type
+from typing import Union, Type, Any
 import numpy as np
 from .device import Device
 from .helpers import Scalar, TensorType, flatten, has_uniform_shape, infer_shape, reshape
@@ -51,6 +51,16 @@ class _BaseBuffer:
   def requires_grad(self): return self.__requires_grad
   @property
   def is_const(self): return self.__const
+  def data(self):
+    if self.__device.type_ == "cpu": return reshape(cpu.data(self.ptr, self.shape.totuple(), self.dtype.fmt), self.shape.totuple())
+    return reshape(cpu.data(cuda.tocpu(self.ptr, self.numel(), self.dtype.fmt), self.shape.totuple(), self.dtype.fmt), self.shape.totuple())
+  def __getitem__(self, index:Union[int,slice]):
+    raw = self.data()
+    if isinstance(raw, (int, float, complex, bool)): raise IndexError(f"invalid index for 0-dim tensor")
+    if isinstance(index, int): return raw[index]
+    elif isinstance(index, slice):
+      if index.step < 0: raise ValueError("Step index must be a 0 or positive integer")
+      return raw[index]
   def sizeof(self):
     length = 1
     for x in self.__shape.tolist(): length *= x
@@ -61,9 +71,6 @@ class _BaseBuffer:
       tocpu = cuda.tocpu(self.ptr, self.shape.numel(), self.dtype.fmt)
       return np.array(reshape(cpu.data(tocpu, self.shape.totuple(), self.dtype.fmt), self.__shape.totuple()))
   def numel(self): return self.__shape.numel()
-  def data(self):
-    if self.__device.type_ == "cpu": return reshape(cpu.data(self.ptr, self.shape.totuple(), self.dtype.fmt), self.shape.totuple())
-    return reshape(cpu.data(cuda.tocpu(self.ptr, self.numel(), self.dtype.fmt), self.shape.totuple(), self.dtype.fmt), self.shape.totuple())
 
 class Buffer(_BaseBuffer):
   def __repr__(self): return f"<Buffer(shape={self.shape.totuple()}, dtype='{self.dtype.ctype}', device='{self.device.type_}:{self.device.index}', requires_grad={self.requires_grad}, const={self.is_const})>"
