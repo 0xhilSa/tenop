@@ -150,6 +150,15 @@ p = Tensor(2, device="cuda:0").lazy()
 print(p)
 print(p.eager())
 
+print("----------Tensor:getters----------")
+e = Tensor([[1,2,3],[4,5,6]], device="cuda:0")
+print(e[0])
+
+print("----------Tensor:setters----------")
+f = Tensor([[1,2,3],[4,5,6]], device="cuda:0")
+f[0] = [4,5,6]
+print(f.numpy())
+
 end = timeit.default_timer()
 
 print("----------Time-----------")
