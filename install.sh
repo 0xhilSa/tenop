@@ -7,10 +7,10 @@ PYTHON_INCLUDE=$(python${PYTHON_VERSION}-config --includes)
 PYTHON_LIBS=$(python${PYTHON_VERSION}-config --ldflags | sed 's@/usr/lib[^ ]*libdl.a@@g')
 CUDA_PATH=/usr/local/cuda
 
-HOST_SRC="./cuten/engine/cpu.c"
-HOST_OUT="./cuten/engine/cpu.so"
-CUDA_SRC="./cuten/engine/cuda.cu"
-CUDA_OUT="./cuten/engine/cuda.so"
+HOST_SRC="./tenop/engine/cpu.c"
+HOST_OUT="./tenop/engine/cpu.so"
+CUDA_SRC="./tenop/engine/cuda.cu"
+CUDA_OUT="./tenop/engine/cuda.so"
 
 spinner(){
   local pid=$1
@@ -41,16 +41,16 @@ echo -ne "\r\033[KCompiled Successfully!\n"
 
 AUTO_YES=false
 
-if python3 -c "import cuten" 2>/dev/null; then
+if python3 -c "import tenop" 2>/dev/null; then
   if [ "$AUTO_YES" = true ]; then
-    echo "Reinstalling cuten ..."
-    pip uninstall -y cuten
+    echo "Reinstalling tenop ..."
+    pip uninstall -y tenop
   else
-    read -p "cuten is already installed. Do you want to reinstall it? (y/N)" choice
+    read -p "tenop is already installed. Do you want to reinstall it? (y/N)" choice
     case "$choice" in
       y|Y)
-        echo "Reinstalling cuten ..."
-        pip uninstall -y cuten
+        echo "Reinstalling tenop ..."
+        pip uninstall -y tenop
         ;;
       *)
         echo "Aborting installation"
@@ -62,4 +62,4 @@ fi
 
 python3 -m build
 cd dist/ && pip install *.whl && cd ..
-rm -rf dist/ build/ cuten.egg-info/
+rm -rf dist/ build/ tenop.egg-info/

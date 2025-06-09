@@ -1,12 +1,12 @@
-from cuten import tensor, Tensor
-from cuten.engine import cuda
-import cuten
+from tenop import tensor, Tensor
+from tenop.engine import cuda
+import tenop
 import timeit
 
 
 start = timeit.default_timer()
 print("----------Tensor:a----------")
-a = tensor([[[1,2,3,4],[5,6,7,8]],[[1,4,9,16],[25,36,49,64]]], dtype=cuten.uchar, device="cuda:0")
+a = tensor([[[1,2,3,4],[5,6,7,8]],[[1,4,9,16],[25,36,49,64]]], dtype=tenop.uchar, device="cuda:0")
 print(a)
 print(type(a))
 print(a.sizeof())
@@ -17,7 +17,7 @@ print(a.numpy())
 print(a.pointer())
 
 print("----------Tensor:b----------")
-b = tensor([1,2,3,4,5,6], dtype=cuten.uint64, device="cuda:0", lazy=True)
+b = tensor([1,2,3,4,5,6], dtype=tenop.uint64, device="cuda:0", lazy=True)
 print(b)
 print(b.sizeof())
 print(b.shape())
@@ -27,7 +27,7 @@ print(b.numpy())
 print(b.pointer())
 
 print("----------Tensor:c----------")
-c = tensor(2, dtype=cuten.uint64, device="cuda:0", lazy=True)
+c = tensor(2, dtype=tenop.uint64, device="cuda:0", lazy=True)
 print(c)
 print(c.sizeof())
 print(c.shape())
@@ -37,7 +37,7 @@ print(c.numpy())
 print(c.pointer())
 
 print("----------Tensor:d----------")
-d = tensor([[[2]]], dtype=cuten.uint64, device="cuda:0", lazy=True)
+d = tensor([[[2]]], dtype=tenop.uint64, device="cuda:0", lazy=True)
 print(d)
 print(d.sizeof())
 print(d.shape())
@@ -47,7 +47,7 @@ print(d.numpy())
 print(d.pointer())
 
 print("----------Tensor:e----------")
-e = a.astype(cuten.longlong)
+e = a.astype(tenop.longlong)
 print(e)
 print(e.sizeof())
 print(e.shape())
@@ -57,7 +57,7 @@ print(e.numpy())
 print(e.pointer())
 
 print("----------Tensor:f----------")
-f = b.astype(cuten.complex128)
+f = b.astype(tenop.complex128)
 print(f)
 print(f.sizeof())
 print(f.shape())
@@ -66,7 +66,7 @@ print(f.numel())
 print(f.numpy())
 print(f.pointer())
 
-g = f.astype(cuten.complex64)
+g = f.astype(tenop.complex64)
 print(g)
 
 print("----------Tensor:1:cpu----------")
