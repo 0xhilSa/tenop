@@ -1,3 +1,3 @@
-cuTen
+tenOp
 
-Lightweight tensor computation library with CUDA backend
+A lightweight & minimalist tensor computation library with CUDA backend
