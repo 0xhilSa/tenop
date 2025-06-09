@@ -25,9 +25,11 @@ class Tensor:
   @property
   def requires_grad(self): return self.__buffer.requires_grad
   @property
-  def is_const(self): return self.__buffer.is_const
+  def isconst(self): return self.__buffer.is_const
   @property
   def islazy(self): return self.__lazy
+  @property
+  def iseager(self): return not self.__lazy
   def numel(self): return self.__buffer.numel()
   def shape(self, dim:Union[int,None]=None):
     if dim is None: return self.__buffer.shape
@@ -37,14 +39,17 @@ class Tensor:
   def sizeof(self): return self.__buffer.sizeof()
   def numpy(self): return self.__buffer.numpy()
   def astype(self, dtype:Union[DType, Type]):
-    return Tensor(self.__buffer.data(), dtype=dtype, device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.is_const, lazy=self.__lazy)
-  def clone(self): return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.is_const, lazy=self.__lazy)
+    return Tensor(self.__buffer.data(), dtype=dtype, device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.isconst, lazy=self.islazy)
+  def clone(self): return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.isconst, lazy=self.islazy)
   def lazy(self):
-    if self.__lazy: return self
-    return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.is_const, lazy=True)
+    if self.islazy: return self
+    return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.isconst, lazy=True)
   def eager(self):
-    if not self.__lazy: return self
-    return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.is_const, lazy=False)
+    if not self.lazy: return self
+    return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.isconst, lazy=False)
+  def const(self):
+    if self.isconst: return self
+    return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=True, lazy=self.islazy)
   @staticmethod
   def ones(shape:Union[Shape,Tuple], device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
     if not isinstance(shape, Shape): shape = Shape(shape)
@@ -60,3 +65,4 @@ class Tensor:
     if not isinstance(shape, Shape): shape = Shape(shape)
     length = shape.numel()
     return Tensor(reshape([value] * length, shape.totuple()), device=device, requires_grad=requires_grad, const=const, lazy=lazy)
+  def __getitem__(self, index:Union[int, slice]): return Tensor(self.__buffer.__getitem__(index), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.isconst, lazy=self.islazy)
