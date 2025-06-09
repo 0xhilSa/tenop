@@ -398,9 +398,30 @@ static PyObject *todata(PyObject *self, PyObject *args){
   return __list(buffer, length, fmt);
 }
 
+static PyObject* get_device_name(PyObject *self, PyObject *args){
+  FILE *fp = fopen("/proc/cpuinfo", "r");
+  if(!fp) return PyErr_Format(PyExc_OSError, "Failed to open /proc/cpuinfo");
+  char line[256];
+  while(fgets(line, sizeof(line), fp)){
+    if(strncmp(line, "model name", 10) == 0){
+      fclose(fp);
+      char *model = strchr(line, ':');
+      if(model){
+        while(*model && isspace(*model)) model++;
+        char *newline = strchr(model, '\n');
+        if(newline) *newline = '\0';
+        return PyUnicode_FromString(model);
+      }
+    }
+  }
+  fclose(fp);
+  Py_RETURN_NONE;
+}
+
 static PyMethodDef methods[] = {
   {"tohost", tohost, METH_VARARGS, "store tensor"},
   {"data", todata, METH_VARARGS, "to list"},
+  {"get_device_name", get_device_name, METH_NOARGS, "get CPU device name"},
   {NULL, NULL, 0, NULL}
 };
 
