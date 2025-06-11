@@ -1,9 +1,19 @@
 <p align="center">
   <img src="./docs/tenop.png" alt="Tenop Logo" width="300">
-  [![PyPI - Version](https://img.shields.io/pypi/v/tenop)](https://pypi.org/project/tenop/)
-  [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tenop)](https://pypi.org/project/tenop/)
-  [![License](https://img.shields.io/github/license/0xhilSa/tenop)](https://github.com/0xhilSa/tenop/blob/master/LICENSE)
 </p>
+
+<div align="center">
+  <a href="https://pypi.org/project/tenop/">
+    <img src="https://img.shields.io/pypi/v/tenop" alt="PyPI - Version">
+  </a>
+  <a href="https://pypi.org/project/tenop/">
+    <img src="https://img.shields.io/pypi/pyversions/tenop" alt="PyPI - Python Version">
+  </a>
+  <a href="https://github.com/0xhilSa/tenop/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/0xhilSa/tenop" alt="License">
+  </a>
+</div>
+
 
 <p align="center">
   <strong>TenOp</strong> is a lightweight and minimalist tensor computation library with CUDA acceleration, designed for high-performance numerical computing.
