@@ -50,6 +50,12 @@ class Tensor:
   def const(self):
     if self.isconst: return self
     return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=True, lazy=self.islazy)
+  def cuda(self):
+    if self.device.type_ == "cuda": return self
+    elif self.device.type_ == "cpu": return Tensor(self.__buffer.data(), device=f"cuda:0", requires_grad=self.requires_grad, const=False, lazy=self.islazy)
+  def cpu(self):
+    if self.device.type_ == "cpu": return self
+    elif self.device.type_ == "cuda": return Tensor(self.__buffer.data(), device=f"cpu:0", requires_grad=self.requires_grad, const=False, lazy=self.islazy)
   @staticmethod
   def ones(shape:Union[Shape,Tuple], device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
     if not isinstance(shape, Shape): shape = Shape(shape)
