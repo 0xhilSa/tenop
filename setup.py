@@ -10,7 +10,7 @@ class Compile(install):
 
 setup(
   name = "tenop",
-  version = "0.0.1",
+  version = "0.0.2",
   url="https://github.com/0xhilSa/tenop",
   author = "Sahil Rajwar",
   license = "MIT",
