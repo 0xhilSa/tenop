@@ -36,6 +36,8 @@ from .dtypes import (
   complex256
 )
 
+__version__ = "0.0.2"
+
 Scalar = Union[int, float, complex, bool, DType]
 TensorType = Union[Scalar, Sequence["TensorType"]]
 
