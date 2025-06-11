@@ -2,3 +2,6 @@ __pycache__/
 clean.sh
 tenop/engine/*.so
 .ipynb_checkpoints/
+build/
+dist/
+tenop.egg-info/
