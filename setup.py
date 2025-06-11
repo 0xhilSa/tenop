@@ -26,4 +26,6 @@ setup(
     "Programming Language :: Python :: 3",
     "Operating System :: POSIX :: Linux",
   ],
+  python_requires = ">=3.10",
+  install_requires = ["numpy"],   # for visualisation `.numpy()`
 )
