@@ -1,3 +1,7 @@
-<img src="./docs/tenop.png" align="center">
+<p align="center">
+  <img src="./docs/tenop.png" alt="Tenop Logo" width="300">
+</p>
 
-A lightweight & minimalist tensor computation library with CUDA backend
+<p align="center">
+  A lightweight and minimalist tensor computation library with a CUDA backend.
+</p>
