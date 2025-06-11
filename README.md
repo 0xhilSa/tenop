@@ -40,7 +40,7 @@ pip install .
 ```
 
 ## Usage
-```bash
+```python
 from tenop import Tensor
 
 x = Tensor([1,2,3,4,5], device="cpu:0")
