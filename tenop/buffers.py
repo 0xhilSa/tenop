@@ -1,9 +1,9 @@
 from __future__ import annotations
 from types import NoneType
-from typing import Union, Type
+from typing import Union, Type, Any
 import numpy as np
 from .device import Device
-from .helpers import Scalar, TensorType, flatten, has_uniform_shape, infer_shape, reshape
+from .helpers import Scalar, TensorType, flat_index, flatten, has_uniform_shape, infer_shape, reshape
 from .dtypes import *
 from .shape import Shape
 from .engine import cpu, cuda
