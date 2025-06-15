@@ -12,6 +12,9 @@ HOST_OUT="./tenop/engine/cpu.so"
 CUDA_SRC="./tenop/engine/cuda.cu"
 CUDA_OUT="./tenop/engine/cuda.so"
 
+CPU_OPS_SRC="./tenop/engine/cpu_ops.c"
+CPU_OPS_OUT="./tenop/engine/cpu_ops.so"
+
 spinner(){
   local pid=$1
   local delay=0.1
@@ -25,6 +28,12 @@ spinner(){
 }
 
 $CC -Wall -shared -fPIC $HOST_SRC -o $HOST_OUT $PYTHON_INCLUDE $PYTHON_LIBS &
+
+compile_pid=$!
+spinner $compile_pid
+wait $compile_pid
+
+$CC -Wall -shared -fPIC $CPU_OPS_SRC -o $CPU_OPS_OUT $PYTHON_INCLUDE $PYTHON_LIBS &
 
 compile_pid=$!
 spinner $compile_pid
