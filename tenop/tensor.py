@@ -1,74 +1,50 @@
 from __future__ import annotations
-from typing import Type, Union, Sequence, Tuple
-from .buffers import Buffer, LazyBuffer
-from .dtypes import *
-from .helpers import reshape
-from .shape import Shape
-
-Scalar = Union[int, float, complex, bool, DType]
-TensorType = Union[Scalar, Sequence["TensorType"]]
+from typing import Type, Tuple
+from tenop.buffers import Buffer
+from tenop.dtypes import DType
+from .helpers import Scalar, TensorType
 
 class Tensor:
-  def __init__(self, tensor:Union[Scalar, TensorType], dtype:Union[Type,DType,None]=None, device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
-    self.__lazy = lazy
-    if self.__lazy: self.__buffer = LazyBuffer(tensor, dtype, device, requires_grad, const)
-    else: self.__buffer = Buffer(tensor, dtype, device, requires_grad, const)
-  def __repr__(self): return f"<Tensor({self.__buffer})>"
+  def __init__(self, buf:Scalar|TensorType, dtype:DType|Type|None=None, device:str="cpu:0", requires_grad:bool=False, const:bool=False):
+    self.__buf = Buffer(buf, dtype=dtype, device=device, requires_grad=requires_grad, const=const)
+    self.__dtype = self.__buf.dtype
+    self.__device = self.__buf.device
+    self.__requires_grad = self.__buf.requires_grad
+    self.__const = self.__buf.isconst
+    self.__shape = self.__buf.shape
+    self.__ndim = self.__buf.ndim
+  def __repr__(self): return f"<Tensor({self.__buf})>"
   @property
-  def device(self): return self.__buffer.device
+  def device(self): return self.__device
   @property
-  def dtype(self): return self.__buffer.dtype
+  def dtype(self): return self.__dtype
   @property
-  def ndim(self): return self.__buffer.ndim
+  def shape(self): return self.__shape
   @property
-  def strides(self): return self.__buffer.stride
+  def ndim(self): return self.__ndim
   @property
-  def requires_grad(self): return self.__buffer.requires_grad
+  def isconst(self): return self.__const
   @property
-  def isconst(self): return self.__buffer.is_const
-  @property
-  def islazy(self): return self.__lazy
-  @property
-  def iseager(self): return not self.__lazy
-  def numel(self): return self.__buffer.numel()
-  def shape(self, dim:Union[int,None]=None):
-    if dim is None: return self.__buffer.shape
-    if not 0 <= dim < len(self.__buffer.shape): raise IndentationError("Index out of range")
-    return self.__buffer.shape[dim]
-  def pointer(self): return self.__buffer.ptr
-  def sizeof(self): return self.__buffer.sizeof()
-  def numpy(self): return self.__buffer.numpy()
-  def astype(self, dtype:Union[DType, Type]):
-    return Tensor(self.__buffer.data(), dtype=dtype, device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.isconst, lazy=self.islazy)
-  def clone(self): return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.isconst, lazy=self.islazy)
-  def lazy(self):
-    if self.islazy: return self
-    return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.isconst, lazy=True)
-  def eager(self):
-    if not self.lazy: return self
-    return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.isconst, lazy=False)
+  def requires_grad(self): return self.__requires_grad
+  def numel(self): return self.__buf.numel()
+  def data(self): return self.__buf.data()
+  def numpy(self): return self.__buf.numpy()
+  def astype(self, dtype:DType): return Tensor(self.__buf.data(), dtype=dtype, device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)
+  def clone(self): return Tensor(self.__buf.data(), device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)
   def const(self):
     if self.isconst: return self
-    return Tensor(self.__buffer.data(), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=True, lazy=self.islazy)
+    return Tensor(self.__buf.data(), device=str(self.device), requires_grad=self.requires_grad, const=True)
   def cuda(self):
     if self.device.type_ == "cuda": return self
-    elif self.device.type_ == "cpu": return Tensor(self.__buffer.data(), device=f"cuda:0", requires_grad=self.requires_grad, const=False, lazy=self.islazy)
+    elif self.device.type_ == "cpu": return Tensor(self.__buf.data(), device=f"cuda:0", requires_grad=self.requires_grad, const=False)
   def cpu(self):
     if self.device.type_ == "cpu": return self
-    elif self.device.type_ == "cuda": return Tensor(self.__buffer.data(), device=f"cpu:0", requires_grad=self.requires_grad, const=False, lazy=self.islazy)
+    elif self.device.type_ == "cuda": return Tensor(self.__buf.data(), device=f"cpu:0", requires_grad=self.requires_grad, const=False)
   @staticmethod
-  def ones(shape:Union[Shape,Tuple], device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
-    if not isinstance(shape, Shape): shape = Shape(shape)
-    length = shape.numel()
-    return Tensor(reshape([1] * length, shape.totuple()), device=device, requires_grad=requires_grad, const=const, lazy=lazy)
+  def full(value, shape:Tuple[int,...], device:str="cpu:0", requires_grad:bool=False, const:bool=False): return Tensor(Buffer.full(value, shape), device=device, requires_grad=requires_grad, const=const)
   @staticmethod
-  def zeros(shape:Union[Shape,Tuple], device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
-    if not isinstance(shape, Shape): shape = Shape(shape)
-    length = shape.numel()
-    return Tensor(reshape([0] * length, shape.totuple()), device=device, requires_grad=requires_grad, const=const, lazy=lazy)
+  def ones(shape:Tuple[int, ...], device:str="cpu:0", requires_grad:bool=False, const:bool=False): return Tensor(Buffer.full(1, shape), device=device, requires_grad=requires_grad, const=const)
   @staticmethod
-  def fill(value:Scalar, shape:Union[Shape,Tuple], device:str="cpu:0", requires_grad:bool=False, const:bool=False, lazy:bool=False):
-    if not isinstance(shape, Shape): shape = Shape(shape)
-    length = shape.numel()
-    return Tensor(reshape([value] * length, shape.totuple()), device=device, requires_grad=requires_grad, const=const, lazy=lazy)
-  def __getitem__(self, index:Union[int, slice]): return Tensor(self.__buffer.__getitem__(index), device=f"{self.device.type_}:{self.device.index}", requires_grad=self.requires_grad, const=self.isconst, lazy=self.islazy)
+  def zeros(shape:Tuple[int, ...], device:str="cpu:0", requires_grad:bool=False, const:bool=False): return Tensor(Buffer.full(0, shape), device=device, requires_grad=requires_grad, const=const)
+  def reduce_max(self): return Tensor(self.__buf.reduce_max(), device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)
+  def reduce_min(self): return Tensor(self.__buf.reduce_min(), device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)
