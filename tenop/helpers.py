@@ -32,3 +32,10 @@ def reshape(array, shape):
       return val
     return [build(shape[1:], index) for _ in range(shape[0])]
   return build(shape, [0])
+
+def flat_index(index, shape):
+  flat_index, stride = 0, 1
+  for i in reversed(range(len(shape))):
+    flat_index += index[i] * stride
+    stride *= shape[i]
+  return flat_index
