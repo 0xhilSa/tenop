@@ -25,3 +25,4 @@ class Device:
   def name(self):
     if self.__type == "cuda": return cuda.get_device_name(self.__index)
     elif self.__type == "cpu": return cpu.get_device_name()[2:]
+  def __str__(self): return f"{self.__type}:{self.__index}"
