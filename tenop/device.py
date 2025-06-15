@@ -16,6 +16,7 @@ class Device:
     elif self.__type == "cuda":
       available = cuda.count()
       if abs(self.__index) >= available: raise RuntimeError(f"CUDA device index {self.__index} exceeds available devices ({available})")
+  def __str__(self): return f"{self.__type}:{self.__index}"
   def __repr__(self): return f"<Device(device='{self.__type}', index={self.__index})>"
   @property
   def type_(self): return self.__type
@@ -25,4 +26,3 @@ class Device:
   def name(self):
     if self.__type == "cuda": return cuda.get_device_name(self.__index)
     elif self.__type == "cpu": return cpu.get_device_name()[2:]
-  def __str__(self): return f"{self.__type}:{self.__index}"

@@ -33,10 +33,10 @@ class Tensor:
   def clone(self): return Tensor(self.__buf.data(), device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)
   def const(self):
     if self.isconst: return self
-    return Tensor(self.__buf.data(), device=str(self.device), requires_grad=self.requires_grad, const=True)
+    return Tensor(self.__buf.data(), dtype=self.dtype, device=str(self.device), requires_grad=self.requires_grad, const=True)
   def cuda(self):
     if self.device.type_ == "cuda": return self
-    elif self.device.type_ == "cpu": return Tensor(self.__buf.data(), device=f"cuda:0", requires_grad=self.requires_grad, const=False)
+    elif self.device.type_ == "cpu": return Tensor(self.__buf.data(), dtype=self.dtype, device=f"cuda:0", requires_grad=self.requires_grad, const=False)
   def cpu(self):
     if self.device.type_ == "cpu": return self
     elif self.device.type_ == "cuda": return Tensor(self.__buf.data(), device=f"cpu:0", requires_grad=self.requires_grad, const=False)
