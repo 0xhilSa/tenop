@@ -45,15 +45,14 @@ from tenop import Tensor
 
 x = Tensor([1,2,3,4,5], device="cpu:0")
 print(x)
+print(x.numpy())
 print(x.device, x.device.name)
-print(x.lazy()) # make Tensor lazy
-
-y = x.cuda()    # store Tensor on CUDA device
+y = x.cuda()
 print(y)
+print(y.numpy())
 print(y.device, y.device.name)
-print(y.lazy())
 ```
-See [./tests/test.py](./tests/test.py) and [./tests/testing.ipynb](./tests/testing.ipynb) for more examples
+See [./tests/testing.ipynb](./tests/testing.ipynb) for more examples
 
 ---
 

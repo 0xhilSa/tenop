@@ -15,6 +15,7 @@ class Buffer:
     self.__device = Device(device)
     self.__requires_grad = requires_grad
     self.__const = const
+    self.__grad = None
     __flatten = flatten(buf)
     self.__ndim = len(self.__shape)
     __stride = []
@@ -50,6 +51,8 @@ class Buffer:
   def requires_grad(self): return self.__requires_grad
   @property
   def isconst(self): return self.__const
+  @property
+  def grad(self): return self.__grad
   def numel(self): return self.__shape.numel()
   def data(self):
     if self.__device.type_ == "cpu": return reshape(cpu.data(self.ptr(), self.shape.totuple(), self.dtype.fmt), self.shape.totuple())
@@ -71,47 +74,11 @@ class Buffer:
   def full(value, shape:Tuple[int,...]):
     length = Shape(shape).numel()
     return [value for _ in range(length)]
-  @staticmethod
-  def ones(shape:Tuple[int, ...]): return Buffer.full(value=1, shape=shape)
-  @staticmethod
-  def zeros(shape:Tuple[int, ...]): return Buffer.full(value=0, shape=shape)
   def reduce_max(self):
-    if self.__device.type_ == "cpu":
-      if self.dtype.fmt == "?": return cpu.data(cpu_ops.reduce_max_bool(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "b": return cpu.data(cpu_ops.reduce_max_char(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "B": return cpu.data(cpu_ops.reduce_max_uchar(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "h": return cpu.data(cpu_ops.reduce_max_short(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "H": return cpu.data(cpu_ops.reduce_max_ushort(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "i": return cpu.data(cpu_ops.reduce_max_int(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "I": return cpu.data(cpu_ops.reduce_max_uint(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "l": return cpu.data(cpu_ops.reduce_max_long(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "L": return cpu.data(cpu_ops.reduce_max_ulong(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "q": return cpu.data(cpu_ops.reduce_max_longlong(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "Q": return cpu.data(cpu_ops.reduce_max_ulonglong(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "f": return cpu.data(cpu_ops.reduce_max_float(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "d": return cpu.data(cpu_ops.reduce_max_double(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "g": return cpu.data(cpu_ops.reduce_max_double(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt in ["F", "D", "G"]: raise ValueError("'>' unsupported for complex dtype")
-      else: raise NotImplementedError
+    if self.__device.type_ == "cpu": return cpu.data(cpu_ops.reduce_max(self.ptr(), self.numel(), self.dtype.fmt), (), self.dtype.fmt)
     else: raise NotImplementedError("CUDA ops not implemented yet")
   def reduce_min(self):
-    if self.__device.type_ == "cpu":
-      if self.dtype.fmt == "?": return cpu.data(cpu_ops.reduce_min_bool(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "b": return cpu.data(cpu_ops.reduce_min_char(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "B": return cpu.data(cpu_ops.reduce_min_uchar(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "h": return cpu.data(cpu_ops.reduce_min_short(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "H": return cpu.data(cpu_ops.reduce_min_ushort(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "i": return cpu.data(cpu_ops.reduce_min_int(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "I": return cpu.data(cpu_ops.reduce_min_uint(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "l": return cpu.data(cpu_ops.reduce_min_long(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "L": return cpu.data(cpu_ops.reduce_min_ulong(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "q": return cpu.data(cpu_ops.reduce_min_longlong(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "Q": return cpu.data(cpu_ops.reduce_min_ulonglong(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "f": return cpu.data(cpu_ops.reduce_min_float(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "d": return cpu.data(cpu_ops.reduce_min_double(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt == "g": return cpu.data(cpu_ops.reduce_min_double(self.ptr(), self.numel()), (), self.dtype.fmt)
-      elif self.dtype.fmt in ["F", "D", "G"]: raise ValueError("'>' unsupported for complex dtype")
-      else: raise NotImplementedError
+    if self.__device.type_ == "cpu": raise NotImplementedError
     else: raise NotImplementedError("CUDA ops not implemented yet")
   def max(self, other): pass
 

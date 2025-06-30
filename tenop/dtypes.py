@@ -11,10 +11,9 @@ class DType:
   ctype:str
   nbyte:int
   signed:bool
-  priority:int
   @classmethod
-  def new(cls, fmt:Fmts, ctype:str, nbyte:int, signed:bool, priority:int): return DType(fmt, ctype, nbyte, signed, priority)
-  def __repr__(self): return f"<DType(ctype='{self.ctype}', fmt='{self.fmt}', nbyte={self.nbyte}, signed={self.signed}, priority={self.priority})>"
+  def new(cls, fmt:Fmts, ctype:str, nbyte:int, signed:bool): return DType(fmt, ctype, nbyte, signed)
+  def __repr__(self): return f"<DType(ctype='{self.ctype}', fmt='{self.fmt}', nbyte={self.nbyte}, signed={self.signed})>"
   @property
   def nbit(self): return self.nbyte * 8
   @staticmethod
@@ -26,30 +25,30 @@ class DType:
     else: raise TypeError
   @staticmethod
   def from_pytype(dtype:Type[Union[int, float, complex, bool]]):
-    if dtype == bool: return DType.new("?", "bool", 1, False,1)
-    elif dtype == int: return DType.new("l", "long", 8, True, 8)
-    elif dtype == float: return DType.new("d", "double", 8, True, 13)
-    elif dtype == complex: return DType.new("D", "double _Complex", 16, True, 16)
+    if dtype == bool: return DType.new("?", "bool", 1, False)
+    elif dtype == int: return DType.new("l", "long", 8, True)
+    elif dtype == float: return DType.new("d", "double", 8, True)
+    elif dtype == complex: return DType.new("D", "double _Complex", 16, True)
     else: TypeError(f"Invalid Type: {dtype.__name__}")
 
 
-bool_ = boolean = DType.new("?", "bool", 1, False, 1)
-char = int8 = DType.new("b", "char", 1, True, 2)
-uchar = uint8 = DType.new("B", "unsigned char", 1, False, 3)
-short = int16 = DType.new("h", "short", 2, True, 4)
-ushort = uint16 = DType.new("H", "unsigned short", 2, False, 5)
-int_ = int32 = DType.new("i", "int", 4, True, 6)
-uint = uint32 = DType.new("I", "unsigned int", 4, False, 7)
-long = int64 = DType.new("l", "long", 8, True, 8)
-ulong = uint64 = DType.new("L", "unsigned long", 8, False, 9)
-longlong = DType.new("q", "long long", 8, True, 10)
-ulonglong = DType.new("Q", "unsigned long long", 8, False, 11)
-float_ = float32 = DType.new("f", "float", 4, True, 12)
-double = float64 = DType.new("d", "double", 8, True, 13)
-longdouble = DType.new("g", "long double", 16, True, 14)
-floatcomplex = complex64 = DType.new("F", "float _Complex", 8, True, 15)
-doublecomplex = complex128 = DType.new("D", "double _Complex", 16, True, 16)
-longdoublecomplex = complex256 = DType.new("G", "long double _Complex", 32, True, 17)
+bool_ = boolean = DType.new("?", "bool", 1, False)
+char = int8 = DType.new("b", "char", 1, True)
+uchar = uint8 = DType.new("B", "unsigned char", 1, False)
+short = int16 = DType.new("h", "short", 2, True)
+ushort = uint16 = DType.new("H", "unsigned short", 2, False)
+int_ = int32 = DType.new("i", "int", 4, True)
+uint = uint32 = DType.new("I", "unsigned int", 4, False)
+long = int64 = DType.new("l", "long", 8, True)
+ulong = uint64 = DType.new("L", "unsigned long", 8, False)
+longlong = DType.new("q", "long long", 8, True)
+ulonglong = DType.new("Q", "unsigned long long", 8, False)
+float_ = float32 = DType.new("f", "float", 4, True)
+double = float64 = DType.new("d", "double", 8, True)
+longdouble = DType.new("g", "long double", 16, True)
+floatcomplex = complex64 = DType.new("F", "float _Complex", 8, True)
+doublecomplex = complex128 = DType.new("D", "double _Complex", 16, True)
+longdoublecomplex = complex256 = DType.new("G", "long double _Complex", 32, True)
 
 BOOLEAN = [boolean]
 INT = [char, int8, short, int16, int_, int32, long, int64, longlong]

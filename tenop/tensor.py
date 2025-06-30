@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Type, Tuple
 from tenop.buffers import Buffer
 from tenop.dtypes import DType
-from .helpers import Scalar, TensorType
+from tenop.helpers import Scalar, TensorType
 
 class Tensor:
   def __init__(self, buf:Scalar|TensorType, dtype:DType|Type|None=None, device:str="cpu:0", requires_grad:bool=False, const:bool=False):
@@ -13,6 +13,7 @@ class Tensor:
     self.__const = self.__buf.isconst
     self.__shape = self.__buf.shape
     self.__ndim = self.__buf.ndim
+    self.__grad = self.__buf.grad
   def __repr__(self): return f"<Tensor({self.__buf})>"
   @property
   def device(self): return self.__device
@@ -26,11 +27,13 @@ class Tensor:
   def isconst(self): return self.__const
   @property
   def requires_grad(self): return self.__requires_grad
+  @property
+  def grad(self): return self.__grad
   def numel(self): return self.__buf.numel()
   def data(self): return self.__buf.data()
   def numpy(self): return self.__buf.numpy()
   def astype(self, dtype:DType): return Tensor(self.__buf.data(), dtype=dtype, device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)
-  def clone(self): return Tensor(self.__buf.data(), device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)
+  def clone(self): return Tensor(self.__buf.data(), dtype=self.dtype, device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)
   def const(self):
     if self.isconst: return self
     return Tensor(self.__buf.data(), dtype=self.dtype, device=str(self.device), requires_grad=self.requires_grad, const=True)
@@ -39,12 +42,12 @@ class Tensor:
     elif self.device.type_ == "cpu": return Tensor(self.__buf.data(), dtype=self.dtype, device=f"cuda:0", requires_grad=self.requires_grad, const=False)
   def cpu(self):
     if self.device.type_ == "cpu": return self
-    elif self.device.type_ == "cuda": return Tensor(self.__buf.data(), device=f"cpu:0", requires_grad=self.requires_grad, const=False)
+    elif self.device.type_ == "cuda": return Tensor(self.__buf.data(), dtype=self.dtype, device=f"cpu:0", requires_grad=self.requires_grad, const=False)
   @staticmethod
   def full(value, shape:Tuple[int,...], device:str="cpu:0", requires_grad:bool=False, const:bool=False): return Tensor(Buffer.full(value, shape), device=device, requires_grad=requires_grad, const=const)
   @staticmethod
   def ones(shape:Tuple[int, ...], device:str="cpu:0", requires_grad:bool=False, const:bool=False): return Tensor(Buffer.full(1, shape), device=device, requires_grad=requires_grad, const=const)
   @staticmethod
   def zeros(shape:Tuple[int, ...], device:str="cpu:0", requires_grad:bool=False, const:bool=False): return Tensor(Buffer.full(0, shape), device=device, requires_grad=requires_grad, const=const)
-  def reduce_max(self): return Tensor(self.__buf.reduce_max(), device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)
-  def reduce_min(self): return Tensor(self.__buf.reduce_min(), device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)
+  def reduce_max(self): return Tensor(self.__buf.reduce_max(), dtype=self.dtype, device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)
+  def reduce_min(self): return Tensor(self.__buf.reduce_min(), dtype=self.dtype, device=str(self.device), requires_grad=self.requires_grad, const=self.isconst)

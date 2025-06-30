@@ -1,9 +1,9 @@
+#include <python3.10/Python.h>
 #include <limits.h>
 #include <float.h>
-#include <python3.10/Python.h>
-#include <complex.h>
-#include <python3.10/methodobject.h>
+#include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 
 void cpu_free(PyObject *pycapsule){
@@ -11,511 +11,171 @@ void cpu_free(PyObject *pycapsule){
   if(ptr) free(ptr);
 }
 
-static PyObject *get_reduced_max_bool(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  bool *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  bool *result = malloc(sizeof(bool));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = 0U;
+static void *kernel_bool(void *ptr, Py_ssize_t length){
+  bool *buf = malloc(sizeof(bool));
+  memset(buf, 0U, sizeof(bool));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((bool *)ptr)[i] > *buf){ *buf = ((bool*)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_char(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  char *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  char *result = malloc(sizeof(char));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = SCHAR_MIN;
+static void *kernel_char(void *ptr, Py_ssize_t length){
+  char *buf = malloc(sizeof(char));
+  memset(buf, 0, sizeof(char));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((char *)ptr)[i] > *buf){ *buf = ((char *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_uchar(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  unsigned char *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  unsigned char *result = malloc(sizeof(unsigned char));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = 0U;
+static void *kernel_uchar(void *ptr, Py_ssize_t length){
+  char *buf = malloc(sizeof(unsigned char));
+  memset(buf, 0U, sizeof(unsigned char));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((unsigned char *)ptr)[i] > *buf){ *buf = ((unsigned char *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_short(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  short *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  short *result = malloc(sizeof(short));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = SHRT_MIN;
+static void *kernel_short(void *ptr, Py_ssize_t length){
+  short *buf = malloc(sizeof(short));
+  memset(buf, 0, sizeof(short));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((short *)ptr)[i] > *buf){ *buf = ((short *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_ushort(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  unsigned short *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  unsigned short *result = malloc(sizeof(unsigned short));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = 0U;
+static void *kernel_ushort(void *ptr, Py_ssize_t length){
+  unsigned short *buf = malloc(sizeof(unsigned short));
+  memset(buf, 0U, sizeof(unsigned short));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((unsigned short *)ptr)[i] > *buf){ *buf = ((unsigned short *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_int(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  int *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  int *result = malloc(sizeof(int));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = INT_MIN;
+static void *kernel_int(void *ptr, Py_ssize_t length){
+  int *buf = malloc(sizeof(int));
+  memset(buf, 0, sizeof(int));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((int *)ptr)[i] > *buf){ *buf = ((int *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_uint(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  unsigned int *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  unsigned int *result = malloc(sizeof(unsigned int));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = 0U;
+static void *kernel_uint(void *ptr, Py_ssize_t length){
+  unsigned int *buf = malloc(sizeof(unsigned int));
+  memset(buf, 0U, sizeof(unsigned int));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((unsigned int *)ptr)[i] > *buf){ *buf = ((unsigned int *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_long(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  long *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  long *result = malloc(sizeof(long));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = LONG_MIN;
+static void *kernel_long(void *ptr, Py_ssize_t length){
+  long *buf = malloc(sizeof(long));
+  memset(buf, 0, sizeof(long));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((long *)ptr)[i] > *buf){ *buf = ((long *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_ulong(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  unsigned long *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  unsigned long *result = malloc(sizeof(unsigned long));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = 0U;
+static void *kernel_ulong(void *ptr, Py_ssize_t length){
+  unsigned long *buf = malloc(sizeof(unsigned long));
+  memset(buf, 0U, sizeof(unsigned long));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((unsigned long *)ptr)[i] > *buf){ *buf = ((unsigned long *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_longlong(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  long long *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  long long *result = malloc(sizeof(long long));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = LLONG_MIN;
+static void *kernel_longlong(void *ptr, Py_ssize_t length){
+  long long *buf = malloc(sizeof(long long));
+  memset(buf, 0, sizeof(long long));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((long long *)ptr)[i] > *buf){ *buf = ((long long *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_ulonglong(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  unsigned long long *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  unsigned long long *result = malloc(sizeof(unsigned long long));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = 0U;
+static void *kernel_ulonglong(void *ptr, Py_ssize_t length){
+  unsigned long long *buf = malloc(sizeof(unsigned long long));
+  memset(buf, 0U, sizeof(unsigned long long));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((unsigned long long *)ptr)[i] > *buf){ *buf = ((unsigned long long *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_float(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  float *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  float *result = malloc(sizeof(float));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = FLT_MIN;
+static void *kernel_float(void *ptr, Py_ssize_t length){
+  float *buf = malloc(sizeof(float));
+  memset(buf, 0.0f, sizeof(float));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((float *)ptr)[i] > *buf){ *buf = ((float *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
 }
 
-static PyObject *get_reduced_max_double(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  double *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  double *result = malloc(sizeof(double));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = DBL_MIN;
+static void *kernel_double(void *ptr, Py_ssize_t length){
+  double *buf = malloc(sizeof(double));
+  memset(buf, 0.0, sizeof(double));
   for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
-    }
+    if(((double *)ptr)[i] > *buf){ *buf = ((double *)ptr)[i]; }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return buf;
+}
+static void *kernel_longdouble(void *ptr, Py_ssize_t length){
+  long double *buf = malloc(sizeof(long double));
+  memset(buf, 0.0L, sizeof(long double));
+  for(Py_ssize_t i = 0; i < length; i++){
+    if(((long double *)ptr)[i] > *buf){ *buf = ((long double *)ptr)[i]; }
+  }
+  return buf;
 }
 
-static PyObject *get_reduced_max_longdouble(PyObject *self, PyObject *args){
+static PyObject *reduced_max(PyObject *self, PyObject *args){
   PyObject *tensor;
   Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  long double *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  long double *result = malloc(sizeof(long double));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = LDBL_MIN;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] > *result){
-      *result = buffer[i];
+  const char *fmt;
+  if(!PyArg_ParseTuple(args, "Ons", &tensor, &length, &fmt)) return NULL;
+  void *ptr = PyCapsule_GetPointer(tensor, "CPU");
+  if(!ptr){
+    PyErr_SetString(PyExc_RuntimeError, "Invalid Pointer");
+    return NULL;
+  }
+  void *buf = NULL;
+  switch(*fmt){
+    case '?': { buf = kernel_bool(ptr, length); break; }
+    case 'b': { buf = kernel_char(ptr, length); break; }
+    case 'B': { buf = kernel_uchar(ptr, length); break; }
+    case 'h': { buf = kernel_short(ptr, length); break; }
+    case 'H': { buf = kernel_ushort(ptr, length); break; }
+    case 'i': { buf = kernel_int(ptr, length); break; }
+    case 'I': { buf = kernel_uint(ptr, length); break; }
+    case 'l': { buf = kernel_long(ptr, length); break; }
+    case 'L': { buf = kernel_ulong(ptr, length); break; }
+    case 'q': { buf = kernel_longlong(ptr, length); break; }
+    case 'Q': { buf = kernel_ulonglong(ptr, length); break; }
+    case 'f': { buf = kernel_float(ptr, length); break; }
+    case 'd': { buf = kernel_double(ptr, length); break; }
+    case 'g': { buf = kernel_longdouble(ptr, length); break; }
+    default: {
+      PyErr_Format(PyExc_ValueError, "Invalid DType: %s", fmt);
+      return NULL;
     }
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_bool(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  bool *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  bool *result = malloc(sizeof(bool));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = UCHAR_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
+  if(!buf){
+    PyErr_SetString(PyExc_RuntimeError, "Kernel failed");
+    return NULL;
   }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_char(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  char *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  char *result = malloc(sizeof(char));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = CHAR_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_uchar(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  unsigned char *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  unsigned char *result = malloc(sizeof(unsigned char));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = UCHAR_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_short(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  short *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  short *result = malloc(sizeof(short));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = SHRT_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_ushort(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  unsigned short *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  unsigned short *result = malloc(sizeof(unsigned short));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = USHRT_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_int(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  int *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  int *result = malloc(sizeof(int));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = INT_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_uint(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  unsigned int *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  unsigned int *result = malloc(sizeof(unsigned int));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = UINT_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_long(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  long *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  long *result = malloc(sizeof(long));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = LONG_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_ulong(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  unsigned long *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  unsigned long *result = malloc(sizeof(unsigned long));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = ULONG_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_longlong(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  long long *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  long long *result = malloc(sizeof(long long));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = LLONG_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_ulonglong(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  unsigned long long *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  unsigned long long *result = malloc(sizeof(unsigned long long));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = ULLONG_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_float(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  float *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  float *result = malloc(sizeof(float));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = FLT_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_double(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  double *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  double *result = malloc(sizeof(double));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = DBL_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
-}
-
-static PyObject *get_reduced_min_longdouble(PyObject *self, PyObject *args){
-  PyObject *tensor;
-  Py_ssize_t length;
-  if(!PyArg_ParseTuple(args, "On", &tensor, &length)) return NULL;
-  long double *buffer = PyCapsule_GetPointer(tensor, "CPU");
-  if(buffer == NULL) return NULL;
-  long double *result = malloc(sizeof(long double));
-  if(result == NULL) return PyErr_NoMemory();
-  *result = LDBL_MAX;
-  for(Py_ssize_t i = 0; i < length; i++){
-    if(buffer[i] < *result){
-      *result = buffer[i];
-    }
-  }
-  return PyCapsule_New(result, "CPU", cpu_free);
+  return PyCapsule_New(buf, "CPU", cpu_free);
 }
 
 static PyMethodDef methods[] = {
-  {"reduce_max_bool", get_reduced_max_bool, METH_VARARGS, "get max value for bool dtype"},
-  {"reduce_max_char", get_reduced_max_char, METH_VARARGS, "get max value for char dtype"},
-  {"reduce_max_uchar", get_reduced_max_uchar, METH_VARARGS, "get max value for unsigned char dtype"},
-  {"reduce_max_short", get_reduced_max_short, METH_VARARGS, "get max value for short dtype"},
-  {"reduce_max_ushort", get_reduced_max_ushort, METH_VARARGS, "get max value for unsigned short dtype"},
-  {"reduce_max_int", get_reduced_max_int, METH_VARARGS, "get max value for int dtype"},
-  {"reduce_max_uint", get_reduced_max_uint, METH_VARARGS, "get max value for unsigned int dtype"},
-  {"reduce_max_long", get_reduced_max_long, METH_VARARGS, "get max value for long dtype"},
-  {"reduce_max_ulong", get_reduced_max_ulong, METH_VARARGS, "get max value for unsigned long dtype"},
-  {"reduce_max_longlong", get_reduced_max_longlong, METH_VARARGS, "get max value for long long dtype"},
-  {"reduce_max_ulonglong", get_reduced_max_ulonglong, METH_VARARGS, "get max value for unsigned long long dtype"},
-  {"reduce_max_float", get_reduced_max_float, METH_VARARGS, "get max value for float dtype"},
-  {"reduce_max_double", get_reduced_max_double, METH_VARARGS, "get max value for double dtype"},
-  {"reduce_max_longdouble", get_reduced_max_longdouble, METH_VARARGS, "get max value for long double dtype"},
-  {"reduce_min_bool", get_reduced_min_bool, METH_VARARGS, "get min value for bool dtype"},
-  {"reduce_min_char", get_reduced_min_char, METH_VARARGS, "get min value for char dtype"},
-  {"reduce_min_uchar", get_reduced_min_uchar, METH_VARARGS, "get min value for unsigned char dtype"},
-  {"reduce_min_short", get_reduced_min_short, METH_VARARGS, "get min value for short dtype"},
-  {"reduce_min_ushort", get_reduced_min_ushort, METH_VARARGS, "get min value for unsigned short dtype"},
-  {"reduce_min_int", get_reduced_min_int, METH_VARARGS, "get min value for int dtype"},
-  {"reduce_min_uint", get_reduced_min_uint, METH_VARARGS, "get min value for unsigned int dtype"},
-  {"reduce_min_long", get_reduced_min_long, METH_VARARGS, "get min value for long dtype"},
-  {"reduce_min_ulong", get_reduced_min_ulong, METH_VARARGS, "get min value for unsigned long dtype"},
-  {"reduce_min_longlong", get_reduced_min_longlong, METH_VARARGS, "get min value for long long dtype"},
-  {"reduce_min_ulonglong", get_reduced_min_ulonglong, METH_VARARGS, "get min value for unsigned long long dtype"},
-  {"reduce_min_float", get_reduced_min_float, METH_VARARGS, "get min value for float dtype"},
-  {"reduce_min_double", get_reduced_min_double, METH_VARARGS, "get min value for double dtype"},
-  {"reduce_min_longdouble", get_reduced_min_longdouble, METH_VARARGS, "get min value for long double dtype"},
+  {"reduce_max", reduced_max, METH_VARARGS, "get reduced max"},
   {NULL, NULL, 0, NULL}
 };
 

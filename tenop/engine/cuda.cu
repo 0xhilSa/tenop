@@ -1,15 +1,6 @@
-#include <cuda_device_runtime_api.h>
-#include <cuda_runtime_api.h>
-#include <driver_types.h>
 #include <python3.10/Python.h>
 #include <cuda_runtime.h>
 #include <cuComplex.h>
-#include <python3.10/floatobject.h>
-#include <python3.10/listobject.h>
-#include <python3.10/methodobject.h>
-#include <python3.10/modsupport.h>
-#include <python3.10/object.h>
-#include <python3.10/pyerrors.h>
 
 
 #define CUDA_ERROR(call)                                        \

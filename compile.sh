@@ -14,8 +14,8 @@ CUDA_OUT="./tenop/engine/cuda.so"
 
 CPU_OPS_SRC="./tenop/engine/cpu_ops.c"
 CPU_OPS_OUT="./tenop/engine/cpu_ops.so"
-CUDA_OPS_SRC="./tenop/engine/cuda_ops.cu"
-CUDA_OPS_OUT="./tenop/engine/cuda_ops.so"
+#CUDA_OPS_SRC="./tenop/engine/cuda_ops.cu"
+#CUDA_OPS_OUT="./tenop/engine/cuda_ops.so"
 
 spinner(){
   local pid=$1
@@ -41,25 +41,25 @@ compile_pid=$!
 spinner $compile_pid
 wait $compile_pid
 
-$NVCC -shared -Xcompiler -fPIC -I$CUDA_PATH/include $PYTHON_INCLUDE \
+$NVCC -gencode arch=compute_75,code=sm_75 -shared -Xcompiler -fPIC -I$CUDA_PATH/include $PYTHON_INCLUDE \
     -o $CUDA_OUT -L$CUDA_PATH/lib64 -lcudart $CUDA_SRC &
 
 compile_pid=$!
 spinner $compile_pid
 wait $compile_pid
 
-$NVCC -shared -Xcompiler -fPIC -I$CUDA_PATH/include $PYTHON_INCLUDE \
-    -o $CUDA_OUT -L$CUDA_PATH/lib64 -lcudart $CUDA_SRC &
+#$NVCC -shared -Xcompiler -fPIC -I$CUDA_PATH/include $PYTHON_INCLUDE \
+#    -o $CUDA_OUT -L$CUDA_PATH/lib64 -lcudart $CUDA_SRC &
+#
+#compile_pid=$!
+#spinner $compile_pid
+#wait $compile_pid
 
-compile_pid=$!
-spinner $compile_pid
-wait $compile_pid
-
-$NVCC -shared -Xcompiler -fPIC -I$CUDA_PATH/include $PYTHON_INCLUDE \
-    -o $CUDA_OPS_OUT -L$CUDA_PATH/lib64 -lcudart $CUDA_OPS_SRC &
-
-compile_pid=$!
-spinner $compile_pid
-wait $compile_pid
+#$NVCC -shared -Xcompiler -fPIC -I$CUDA_PATH/include $PYTHON_INCLUDE \
+#    -o $CUDA_OPS_OUT -L$CUDA_PATH/lib64 -lcudart $CUDA_OPS_SRC &
+#
+#compile_pid=$!
+#spinner $compile_pid
+#wait $compile_pid
 
 echo -ne "\r\033[KCompiled Successfully!\n"
