@@ -1,11 +1,5 @@
 #include <python3.10/Python.h>
-#include <limits.h>
-#include <float.h>
-#include <python3.10/pyerrors.h>
-#include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
-#include <math.h>
 
 
 void cpu_free(PyObject *pycapsule){
