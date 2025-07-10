@@ -1,11 +1,11 @@
 from __future__ import annotations
 import numpy as np
 from typing import Optional, Tuple, Union
-from .helpers import Scalar, TensorType, flatten, has_uniform_shape, infer_shape, reshape
-from .engine import cpu, cuda, cpu_ops
-from .shape import Shape
-from .device import Device
-from .dtypes import *
+from tenop.helpers import Scalar, TensorType, flatten, has_uniform_shape, infer_shape, reshape
+from tenop.engine import cpu, cuda, cpu_ops
+from tenop.shape import Shape
+from tenop.device import Device
+from tenop.dtypes import *
 
 
 class Buffer:
@@ -78,7 +78,7 @@ class Buffer:
     if self.__device.type_ == "cpu": return cpu.data(cpu_ops.reduce_max(self.ptr(), self.numel(), self.dtype.fmt), (), self.dtype.fmt)
     else: raise NotImplementedError("CUDA ops not implemented yet")
   def reduce_min(self):
-    if self.__device.type_ == "cpu": raise NotImplementedError
+    if self.__device.type_ == "cpu": return cpu.data(cpu_ops.reduce_min(self.ptr(), self.numel(), self.dtype.fmt), (), self.dtype.fmt)
     else: raise NotImplementedError("CUDA ops not implemented yet")
   def max(self, other): pass
 
